@@ -30,7 +30,10 @@ public enum AnyCodingValue: Sendable, Codable {
         case let .array(array):
             try container.encode(array)
         case let .object(object):
-            try container.encode(object)
+            var objectContainer = encoder.container(keyedBy: DynamicCodingKey.self)
+            for key in object.keys.sorted() {
+                try objectContainer.encode(object[key]!, forKey: DynamicCodingKey(stringValue: key)!)
+            }
         }
     }
 
@@ -169,5 +172,20 @@ extension AnyCodingValue: ExpressibleByArrayLiteral {
 extension AnyCodingValue: ExpressibleByDictionaryLiteral {
     public init(dictionaryLiteral elements: (String, AnyCodingValue)...) {
         self = .object(.init(uniqueKeysWithValues: elements))
+    }
+}
+
+private struct DynamicCodingKey: CodingKey {
+    var stringValue: String
+    var intValue: Int?
+
+    init?(stringValue: String) {
+        self.stringValue = stringValue
+        self.intValue = nil
+    }
+
+    init?(intValue: Int) {
+        self.intValue = intValue
+        self.stringValue = String(intValue)
     }
 }

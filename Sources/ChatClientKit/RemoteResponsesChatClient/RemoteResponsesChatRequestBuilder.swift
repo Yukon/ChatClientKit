@@ -20,7 +20,11 @@ struct RemoteResponsesRequestBuilder {
         path: String?,
         apiKey: String?,
         additionalHeaders: [String: String],
-        encoder: JSONEncoder = JSONEncoder()
+        encoder: JSONEncoder = {
+            let e = JSONEncoder()
+            e.outputFormatting = [.sortedKeys]
+            return e
+        }()
     ) {
         self.baseURL = baseURL
         self.path = path
@@ -82,7 +86,7 @@ struct RemoteResponsesRequestBuilder {
             for (key, value) in additionalField {
                 originalDictionary[key] = value
             }
-            request.httpBody = try JSONSerialization.data(withJSONObject: originalDictionary, options: [])
+            request.httpBody = try JSONSerialization.data(withJSONObject: originalDictionary, options: [.sortedKeys])
         }
 
         logger.debug("constructed responses request URL: \(url.absoluteString)")
